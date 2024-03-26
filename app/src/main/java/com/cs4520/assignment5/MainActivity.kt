@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity(){
     //TODO: product list fragment functionality
     //TODO: Workmanager
     //TODO: Readme
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -91,8 +92,8 @@ class MainActivity : ComponentActivity(){
     }
     @Composable
     fun ProductList(){
-        Text("Product List (Fix Later)")
+        LazyColumn{
+            //TODO: fix
+        }
     }
-
-
 }
