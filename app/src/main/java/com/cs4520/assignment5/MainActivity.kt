@@ -29,6 +29,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity(){
+
+    //TODO: product list fragment functionality
+    //TODO: Workmanager
+    //TODO: Readme
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
