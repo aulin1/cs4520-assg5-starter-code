@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +32,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.lazy.items
 import androidx.lifecycle.ViewModelProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
 
 class MainActivity : ComponentActivity(){
 
@@ -71,8 +76,7 @@ class MainActivity : ComponentActivity(){
     @Composable
     fun Login(onNavigateToProductsList: () -> Unit){
         var username_text by remember{mutableStateOf("")}
-        var password_text by remember{ mutableStateOf("")
-        }
+        var password_text by remember{ mutableStateOf("") }
         Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
             val context = LocalContext.current
             TextField(
@@ -104,7 +108,7 @@ class MainActivity : ComponentActivity(){
         viewModelFactory = ProductViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ProductViewModel::class.java]
 
-        var productList : List <ProductData> = viewModel.ResponseData
+        var productList by remember { viewModel.ResponseData }
 
         //TODO: add error message + loading bar
         LazyColumn{
@@ -116,6 +120,23 @@ class MainActivity : ComponentActivity(){
 
     @Composable
     fun ProductView(p : ProductData){
-        //TODO: fix
+        if(p.type == "Food"){
+            Row {
+                Image(painter = painterResource(id = R.drawable.foodphoto), null)
+                Column{
+                    Text(p.name)
+                    p.expiryDate?.let { Text(it) }
+                    Text("$" + p.price)
+                }
+            }
+        } else {
+            Row {
+                Image(painter = painterResource(id = R.drawable.equipmentphoto), null)
+                Column{
+                    Text(p.name)
+                    Text("$" + p.price)
+                }
+            }
+        }
     }
 }
