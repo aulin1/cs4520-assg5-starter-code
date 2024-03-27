@@ -28,15 +28,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.lazy.items
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : ComponentActivity(){
 
     //TODO: product list fragment functionality
+    //TODO: broken, repeat, missing data
     //TODO: Workmanager
     //TODO: Readme
 
+    private lateinit var viewModel: ProductViewModel
+    private lateinit var viewModelFactory: ProductViewModelFactory
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ProductDatabase.setContext(this)
+
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -92,8 +101,21 @@ class MainActivity : ComponentActivity(){
     }
     @Composable
     fun ProductList(){
+        viewModelFactory = ProductViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory)[ProductViewModel::class.java]
+
+        var productList : List <ProductData> = viewModel.ResponseData
+
+        //TODO: add error message + loading bar
         LazyColumn{
-            //TODO: fix
+            items(productList) { product ->
+                ProductView(product)
+            }
         }
+    }
+
+    @Composable
+    fun ProductView(p : ProductData){
+        //TODO: fix
     }
 }
