@@ -1,18 +1,25 @@
 package com.cs4520.assignment5
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -30,16 +37,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.foundation.lazy.items
 import androidx.lifecycle.ViewModelProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity(){
 
-    //TODO: product list fragment functionality
     //TODO: broken, repeat, missing data
+    //TODO: double check loading
     //TODO: Workmanager
     //TODO: Readme
 
@@ -48,6 +56,7 @@ class MainActivity : ComponentActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("Testing", "start")
 
         ProductDatabase.setContext(this)
 
@@ -105,15 +114,32 @@ class MainActivity : ComponentActivity(){
     }
     @Composable
     fun ProductList(){
+        Log.d("Testing", "Product List")
         viewModelFactory = ProductViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ProductViewModel::class.java]
 
-        var productList by remember { viewModel.ResponseData }
+        val productList by viewModel.ResponseData.observeAsState(listOf())
+        val progress by viewModel.progress.observeAsState()
 
-        //TODO: add error message + loading bar
-        LazyColumn{
-            items(productList) { product ->
-                ProductView(product)
+        if(progress == 0){
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+            }
+        } else if (progress == 1) {
+            if(productList.isEmpty()){
+                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("No products available")
+                }
+            } else {
+                LazyColumn {
+                    items(items = productList) { product ->
+                        ProductView(product)
+                    }
+                }
+            }
+        } else { //error message
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("An error occurred")
             }
         }
     }
@@ -121,18 +147,25 @@ class MainActivity : ComponentActivity(){
     @Composable
     fun ProductView(p : ProductData){
         if(p.type == "Food"){
-            Row {
-                Image(painter = painterResource(id = R.drawable.foodphoto), null)
-                Column{
+            Row(Modifier.background(Color(0xFFFFD965)).fillMaxWidth()){
+                Image(
+                    painter = painterResource(id = R.drawable.foodphoto),
+                    null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(150.dp).padding(10.dp))
+                Column(modifier = Modifier.height(150.dp), verticalArrangement = Arrangement.Center){
                     Text(p.name)
                     p.expiryDate?.let { Text(it) }
                     Text("$" + p.price)
                 }
             }
         } else {
-            Row {
-                Image(painter = painterResource(id = R.drawable.equipmentphoto), null)
-                Column{
+            Row(Modifier.background(Color(0xFFE06666)).fillMaxWidth()) {
+                Image(painter = painterResource(id = R.drawable.equipmentphoto),
+                    null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(150.dp).padding(10.dp))
+                Column(modifier = Modifier.height(150.dp), verticalArrangement = Arrangement.Center){
                     Text(p.name)
                     Text("$" + p.price)
                 }

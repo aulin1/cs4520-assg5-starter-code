@@ -1,7 +1,8 @@
 package com.cs4520.assignment5
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.toMutableStateList
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -10,16 +11,26 @@ import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 
 class ProductViewModel() : ViewModel() {
-    private val _ResponseData = mutableStateListOf<ProductData>()
-    val ResponseData = _ResponseData.toMutableStateList()
+    private val _ResponseData = MutableLiveData<ArrayList<ProductData>>()
+    val ResponseData : LiveData<ArrayList<ProductData>> = _ResponseData
     private val repository = DataRepository()
+    private var _progress = MutableLiveData<Int>()
+    val progress : LiveData<Int>  = _progress //0- processing, 1 - success, 2- fail
 
     private val database = ProductDatabase.getInstance()
 
     init {
+        Log.d("Testing", "init viewmodel")
+        _progress.value = 0
         makeApiCall()
     }
 
+
+    private fun checkList(p: ArrayList<ProductData>) : ArrayList<ProductData>{
+        val result = ArrayList<ProductData>()
+        //TODO: modify here
+        return result
+    }
 
     private fun makeApiCall(input: String?=null) {
         val dao = database.productDao()
@@ -30,28 +41,34 @@ class ProductViewModel() : ViewModel() {
                 withContext(Dispatchers.Main) {
                     try {
                         if (response.isSuccessful) {
-                            _ResponseData.clear()
-                            response.body()?.let { _ResponseData.addAll(it) }
+                            _progress.value = 1
+                            Log.d("Testing", "Success")
+
+                            _ResponseData.value = response.body()
 
                             response.body()?.let { dao.insertAll(it) }
                         } else {
-                            _ResponseData.clear()
+                            _progress.value = 1
+                            _ResponseData.value?.clear()
                         }
                     } catch (e: Throwable) {
-                        _ResponseData.clear()
+                        _progress.value = 2
+                        Log.d("Testing", "Fail")
+                        _ResponseData.value?.clear()
                     }
                 }
             } catch (e : UnknownHostException){ //access database
                 withContext(Dispatchers.Main){
+                    _progress.value = 1
                     val databaseEntries = dao.getProducts()
                     if (databaseEntries.isEmpty()) {
-                        _ResponseData.clear()
+                        _ResponseData.value?.clear()
                     } else {
                         val newData = ArrayList<ProductData>()
                         for(item in databaseEntries){
                             newData.add(item)
                         }
-                        _ResponseData.addAll(newData)
+                        _ResponseData.value = newData
                     }
                 }
             }
