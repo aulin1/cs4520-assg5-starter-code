@@ -136,7 +136,7 @@ class MainActivity : ComponentActivity(){
             }
         } else { //error message
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("An error occurred")
+                Text("Error fetching data")
             }
         }
     }

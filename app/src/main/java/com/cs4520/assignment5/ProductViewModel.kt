@@ -82,7 +82,7 @@ class ProductViewModel() : ViewModel() {
 
                             _ResponseData.value?.let { dao.insertAll(it) }
                         } else {
-                            _progress.value = 1
+                            _progress.value = 2
                             _ResponseData.value?.clear()
                         }
                     } catch (e: Throwable) {
