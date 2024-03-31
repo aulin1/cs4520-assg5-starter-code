@@ -45,9 +45,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity(){
-
-    //TODO: broken, repeat, missing data
-    //TODO: double check loading
     //TODO: Workmanager
     //TODO: Readme
 

@@ -28,8 +28,42 @@ class ProductViewModel() : ViewModel() {
 
     private fun checkList(p: ArrayList<ProductData>) : ArrayList<ProductData>{
         val result = ArrayList<ProductData>()
-        //TODO: modify here
+        for(item in p){
+            var newItem : ProductData
+            if(item.type == "Equipment"){
+                if(item.name == "" || item.price < 0){ //invalid answers, so we don't add it to the list
+                    Log.d("Testing", "Invalid item equipment")
+                    continue
+                } else {
+                    if(!isInList(item, result)){ //no repeats
+                        result.add(item)
+                    }
+                }
+            } else if(item.type == "Food"){
+                if(item.name == "" || item.price <0 || item.expiryDate == null){
+                    Log.d("Testing", "Invalid item food")
+                    continue
+                } else {
+                    if(!isInList(item, result)){ //no repeats
+                        result.add(item)
+                    }
+                }
+            } else { //It isn't a valid type, so we don't add it to the list
+                continue
+            }
+        }
         return result
+    }
+
+    private fun isInList(item: ProductData, list: ArrayList<ProductData>) : Boolean{
+        for(i in list){
+            if(i == item){
+                Log.d("Testing", "Repeat Data")
+                Log.d("Testing", item.name)
+                return true
+            }
+        }
+        return false
     }
 
     private fun makeApiCall(input: String?=null) {
@@ -44,9 +78,9 @@ class ProductViewModel() : ViewModel() {
                             _progress.value = 1
                             Log.d("Testing", "Success")
 
-                            _ResponseData.value = response.body()
+                            _ResponseData.value = response.body()?.let { checkList(it) }
 
-                            response.body()?.let { dao.insertAll(it) }
+                            _ResponseData.value?.let { dao.insertAll(it) }
                         } else {
                             _progress.value = 1
                             _ResponseData.value?.clear()
