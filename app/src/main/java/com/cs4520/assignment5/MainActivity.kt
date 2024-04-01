@@ -1,5 +1,7 @@
 package com.cs4520.assignment5
 
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -43,19 +45,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.work.WorkManager
 
 class MainActivity : ComponentActivity(){
-    //TODO: Workmanager
-    //TODO: Readme
 
     private lateinit var viewModel: ProductViewModel
     private lateinit var viewModelFactory: ProductViewModelFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("Testing", "start")
+        //Log.d("Testing", "start")
 
         ProductDatabase.setContext(this)
+        ProductWorkManager.workManager = WorkManager.getInstance(this)
+
+        viewModelFactory = ProductViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory)[ProductViewModel::class.java]
 
         setContent {
             MaterialTheme {
@@ -101,6 +106,7 @@ class MainActivity : ComponentActivity(){
             )
             Button(onClick = {
                 if(username_text == "admin" && password_text == "admin"){
+                    viewModel.initialize()
                     onNavigateToProductsList()
                 } else {
                     Toast.makeText(context, "Username or password is incorrect.", Toast.LENGTH_SHORT).show()
@@ -111,9 +117,7 @@ class MainActivity : ComponentActivity(){
     }
     @Composable
     fun ProductList(){
-        Log.d("Testing", "Product List")
-        viewModelFactory = ProductViewModelFactory()
-        viewModel = ViewModelProvider(this, viewModelFactory)[ProductViewModel::class.java]
+        //Log.d("Testing", "Product List")
 
         val productList by viewModel.ResponseData.observeAsState(listOf())
         val progress by viewModel.progress.observeAsState()

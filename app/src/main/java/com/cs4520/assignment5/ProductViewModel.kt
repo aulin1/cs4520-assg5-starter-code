@@ -5,10 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
+import java.util.concurrent.TimeUnit
 
 class ProductViewModel() : ViewModel() {
     private val _ResponseData = MutableLiveData<ArrayList<ProductData>>()
@@ -19,10 +24,28 @@ class ProductViewModel() : ViewModel() {
 
     private val database = ProductDatabase.getInstance()
 
-    init {
-        Log.d("Testing", "init viewmodel")
+    fun initialize() {
+        //Log.d("Testing", "init viewmodel")
         _progress.value = 0
+
+        createWorkBuilder()
+
         makeApiCall()
+    }
+
+    private fun createWorkBuilder(){
+        val getNewItemsRequest =
+            PeriodicWorkRequestBuilder<ProductWorker>(1, TimeUnit.HOURS, )
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .setConstraints(
+                Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+            ).build()
+
+        ProductWorkManager.workManager.enqueueUniquePeriodicWork("loadProducts",
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            getNewItemsRequest)
     }
 
 
@@ -32,7 +55,7 @@ class ProductViewModel() : ViewModel() {
             var newItem : ProductData
             if(item.type == "Equipment"){
                 if(item.name == "" || item.price < 0){ //invalid answers, so we don't add it to the list
-                    Log.d("Testing", "Invalid item equipment")
+                    //Log.d("Testing", "Invalid item equipment")
                     continue
                 } else {
                     if(!isInList(item, result)){ //no repeats
@@ -41,7 +64,7 @@ class ProductViewModel() : ViewModel() {
                 }
             } else if(item.type == "Food"){
                 if(item.name == "" || item.price <0 || item.expiryDate == null){
-                    Log.d("Testing", "Invalid item food")
+                    //Log.d("Testing", "Invalid item food")
                     continue
                 } else {
                     if(!isInList(item, result)){ //no repeats
@@ -58,8 +81,8 @@ class ProductViewModel() : ViewModel() {
     private fun isInList(item: ProductData, list: ArrayList<ProductData>) : Boolean{
         for(i in list){
             if(i == item){
-                Log.d("Testing", "Repeat Data")
-                Log.d("Testing", item.name)
+                //Log.d("Testing", "Repeat Data")
+                //Log.d("Testing", item.name)
                 return true
             }
         }
@@ -76,7 +99,7 @@ class ProductViewModel() : ViewModel() {
                     try {
                         if (response.isSuccessful) {
                             _progress.value = 1
-                            Log.d("Testing", "Success")
+                            //Log.d("Testing", "Success")
 
                             _ResponseData.value = response.body()?.let { checkList(it) }
 
@@ -87,7 +110,7 @@ class ProductViewModel() : ViewModel() {
                         }
                     } catch (e: Throwable) {
                         _progress.value = 2
-                        Log.d("Testing", "Fail")
+                        //Log.d("Testing", "Fail")
                         _ResponseData.value?.clear()
                     }
                 }

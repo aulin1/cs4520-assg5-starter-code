@@ -22,6 +22,9 @@ interface ProductDAO {
     @Delete
     fun delete(product: ProductData)
 
+    @Query("DELETE FROM productdata")
+    fun clearAll();
+
     @Query("SELECT * FROM productdata")
     fun getProducts(): List<ProductData>
 }
